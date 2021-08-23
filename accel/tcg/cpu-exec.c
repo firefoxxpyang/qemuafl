@@ -69,6 +69,17 @@ static unsigned char
                dummy[MAP_SIZE]; /* costs MAP_SIZE but saves a few instructions */
 unsigned char *afl_area_ptr = dummy;          /* Exported for afl_gen_trace */
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// FirefoxXP Add Start
+
+unsigned char *afl_distance_area_ptr = dummy;          /* Exported for afl_gen_trace */
+unsigned char *afl_cdn_count_ptr = dummy;          /* Exported for afl_gen_trace */
+unsigned char *afl_cdn_distance_ptr = dummy;          /* Exported for afl_gen_trace */
+unsigned char *afl_cdn_address_ptr = dummy;          /* Exported for afl_gen_trace */
+
+// FirefoxXP Add End
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 /* Exported variables populated by the code patched into elfload.c: */
 
 abi_ulong afl_entry_point,                      /* ELF entry point (_start) */
@@ -342,7 +353,35 @@ void afl_setup(void) {
     if (inst_r) afl_area_ptr[0] = 1;
 
   }
-  
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// FirefoxXP Add Start
+
+  /* load distance memory */ 
+  if (getenv(DISTANCE_SHM_ENV_VAR)) {  // 
+
+    id_str = getenv(DISTANCE_SHM_ENV_VAR);
+
+    if (id_str) {
+
+      u32 shm_id = atoi(id_str);
+
+      afl_distance_area_ptr = shmat(shm_id, NULL, 0);
+
+      if (afl_distance_area_ptr == (void *)-1) exit(1);
+
+    }
+
+    afl_cdn_count_ptr     = afl_area_ptr + sizeof(int64_t);          /* Exported for afl_gen_trace */
+    afl_cdn_distance_ptr  = afl_cdn_count_ptr + sizeof(int64_t);          /* Exported for afl_gen_trace */
+    afl_cdn_address_ptr   = afl_cdn_distance_ptr + sizeof(int64_t);          /* Exported for afl_gen_trace */
+
+  }
+
+// FirefoxXP Add End
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
   disable_caching = getenv("AFL_QEMU_DISABLE_CACHE") != NULL;
 
   if (getenv("___AFL_EINS_ZWEI_POLIZEI___")) {  // CmpLog forkserver

@@ -82,6 +82,25 @@ void HELPER(afl_maybe_log)(target_ulong cur_loc) {
 
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////
+// FirefoxXP Add Start
+
+extern unsigned char *afl_distance_area_ptr;
+extern unsigned char *afl_cdn_count_ptr;
+extern unsigned char *afl_cdn_distance_ptr;
+extern unsigned char *afl_cdn_address_ptr;
+
+void HELPER(afl_distance_log)(target_ulong cur_loc,target_ulong distance) {
+
+    *afl_cdn_count_ptr = *afl_cdn_count_ptr  + 1;
+    *afl_cdn_distance_ptr = *afl_cdn_distance_ptr + distance;
+    *afl_cdn_address_ptr = cur_loc;
+
+}
+
+// FirefoxXP Add End
+//////////////////////////////////////////////////////////////////////////////////////////////
+
 static target_ulong pc_hash(target_ulong x) {
     x = ((x >> 16) ^ x) * 0x45d9f3b;
     x = ((x >> 16) ^ x) * 0x45d9f3b;
@@ -91,6 +110,16 @@ static target_ulong pc_hash(target_ulong x) {
 
 /* Generates TCG code for AFL's tracing instrumentation. */
 static void afl_gen_trace(target_ulong cur_loc) {
+////////////////////////////////////////////////////////////////////////////////
+// FirefoxXP Add Start
+  
+  // compute hash value
+  uint64_t                            ulIndex;
+  P_CONTROL_DEPENDENCE_NDOE_RECORD    pstPointer;
+  int                                 i;
+
+// FirefoxXP Add End
+////////////////////////////////////////////////////////////////////////////////
 
   /* Optimize for cur_loc > afl_end_code, which is the most likely case on
      Linux systems. */
@@ -117,6 +146,30 @@ static void afl_gen_trace(target_ulong cur_loc) {
   gen_helper_afl_maybe_log(cur_loc_v);
   tcg_temp_free(cur_loc_v);
 
+////////////////////////////////////////////////////////////////////////////////
+// FirefoxXP Add Start
+
+  ulIndex     = (cur_loc & 0xFFFFF) % ( HASH_TABLE_SIZE/4 );
+  pstPointer  = (P_CONTROL_DEPENDENCE_NDOE_RECORD)afl_distance_area_ptr + ulIndex;
+
+  //fprintf(stderr,"Address is:0x%lx\n",ulIndex);
+  i = 0;
+  while( ( i < HASH_TABLE_MAX_COLLISION_COUNT ) && ( (pstPointer+i)->ulControlDepedenceNodeAddress > 0 ) ){
+      if( cur_loc == (pstPointer+i)->ulControlDepedenceNodeAddress ){
+          TCGv cur_loc_v1 = tcg_const_tl(cur_loc);
+          TCGv cur_loc_v2 = tcg_const_tl((pstPointer+i)->ulControlDepedenceNodeDistance);
+          gen_helper_afl_distance_log(cur_loc_v1, cur_loc_v2);
+          tcg_temp_free(cur_loc_v1);
+          tcg_temp_free(cur_loc_v2);
+          break;
+      }
+      i++;
+  }
+
+  
+
+// FirefoxXP Add End
+////////////////////////////////////////////////////////////////////////////////
 }
 
 /* #define DEBUG_TB_INVALIDATE */
