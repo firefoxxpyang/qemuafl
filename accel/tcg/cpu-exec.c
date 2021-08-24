@@ -72,10 +72,11 @@ unsigned char *afl_area_ptr = dummy;          /* Exported for afl_gen_trace */
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // FirefoxXP Add Start
 
-unsigned char *afl_distance_area_ptr = dummy;          /* Exported for afl_gen_trace */
-unsigned char *afl_cdn_count_ptr = dummy;          /* Exported for afl_gen_trace */
-unsigned char *afl_cdn_distance_ptr = dummy;          /* Exported for afl_gen_trace */
-unsigned char *afl_cdn_address_ptr = dummy;          /* Exported for afl_gen_trace */
+unsigned char *afl_distance_area_ptr          = dummy;          /* Exported for afl_gen_trace */
+unsigned char *afl_cdn_shortest_distance_ptr  = dummy;          /* Exported for afl_gen_trace */
+unsigned char *afl_cdn_count_ptr              = dummy;          /* Exported for afl_gen_trace */
+unsigned char *afl_cdn_distance_ptr           = dummy;          /* Exported for afl_gen_trace */
+unsigned char *afl_cdn_address_ptr            = dummy;          /* Exported for afl_gen_trace */
 
 // FirefoxXP Add End
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -372,9 +373,10 @@ void afl_setup(void) {
 
     }
 
-    afl_cdn_count_ptr     = afl_area_ptr + sizeof(int64_t);          /* Exported for afl_gen_trace */
-    afl_cdn_distance_ptr  = afl_cdn_count_ptr + sizeof(int64_t);          /* Exported for afl_gen_trace */
-    afl_cdn_address_ptr   = afl_cdn_distance_ptr + sizeof(int64_t);          /* Exported for afl_gen_trace */
+    afl_cdn_shortest_distance_ptr   = afl_area_ptr + sizeof(int64_t);
+    afl_cdn_count_ptr               = afl_cdn_shortest_distance_ptr + sizeof(int64_t);
+    afl_cdn_distance_ptr            = afl_cdn_count_ptr + sizeof(int64_t);
+    afl_cdn_address_ptr             = afl_cdn_distance_ptr + sizeof(int64_t);
 
   }
 
