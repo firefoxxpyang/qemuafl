@@ -152,7 +152,8 @@ static void afl_gen_trace(target_ulong cur_loc) {
 
 ////////////////////////////////////////////////////////////////////////////////
 // FirefoxXP Add Start
-
+  FILE*         fp;
+  char          buffer[128]="Get Here\n";
   ulIndex     = (cur_loc & 0xFFFFF) % ( HASH_TABLE_SIZE/4 );
   pstPointer  = (P_CONTROL_DEPENDENCE_NDOE_RECORD)afl_distance_area_ptr + ulIndex;
 
@@ -165,6 +166,16 @@ static void afl_gen_trace(target_ulong cur_loc) {
           gen_helper_afl_distance_log(cur_loc_v1, cur_loc_v2);
           tcg_temp_free(cur_loc_v1);
           tcg_temp_free(cur_loc_v2);
+
+       	fp = fopen("/home/yang/log.txt", "a+");
+        if( NULL != fp ){
+            fwrite(buffer, sizeof(char), 128, fp);
+            fclose(fp);
+        }else{
+            fprintf(stderr,"load File Error\n");
+            exit(-1);
+        }
+
           break;
       }
       i++;
