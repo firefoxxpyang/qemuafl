@@ -92,7 +92,22 @@ extern unsigned char *afl_cdn_distance_ptr;
 extern unsigned char *afl_cdn_address_ptr;
 
 void HELPER(afl_distance_log)(target_ulong cur_loc,target_ulong distance) {
+    /*
+    FILE*         fp;
+    char          buffer[128];
+    
+    fp = fopen("/home/yang/MyProject/target.txt", "a+");
+    if( NULL != fp ){
+        memset(buffer,0,128);
+        sprintf(buffer, "[afl_distance_log] current CDN eip:0x%lx\n",cur_loc);
+        fwrite(buffer, sizeof(char), strlen(buffer), fp);
 
+        fclose(fp);
+    }else{
+        fprintf(stderr,"load File Error\n");
+        //exit(-1);
+    }
+    */
     if(*afl_cdn_shortest_distance_ptr >= distance ){
         *afl_cdn_address_ptr            = cur_loc;
         *afl_cdn_shortest_distance_ptr  = distance;
@@ -121,6 +136,9 @@ static void afl_gen_trace(target_ulong cur_loc) {
   uint64_t                            ulIndex;
   P_CONTROL_DEPENDENCE_NDOE_RECORD    pstPointer;
   int                                 i;
+  target_ulong                        ulEIP;
+
+  ulEIP = cur_loc;
 
 // FirefoxXP Add End
 ////////////////////////////////////////////////////////////////////////////////
@@ -152,36 +170,79 @@ static void afl_gen_trace(target_ulong cur_loc) {
 
 ////////////////////////////////////////////////////////////////////////////////
 // FirefoxXP Add Start
-  FILE*         fp;
-  char          buffer[128]="Get Here\n";
-  ulIndex     = (cur_loc & 0xFFFFF) % ( HASH_TABLE_SIZE/4 );
-  pstPointer  = (P_CONTROL_DEPENDENCE_NDOE_RECORD)afl_distance_area_ptr + ulIndex;
+  
+  if(NULL != afl_distance_area_ptr){
+    //FILE*         fp;
+    //char          buffer[128];
+    ulIndex     = (ulEIP & 0xFFFFF) % ( HASH_TABLE_SIZE/4 );
+    pstPointer  = (P_CONTROL_DEPENDENCE_NDOE_RECORD)afl_distance_area_ptr + ulIndex;
+    
+    //fprintf(stderr,"Address is:0x%lx\n",ulIndex);
+    
+    i = 0;
+    while( ( i < HASH_TABLE_MAX_COLLISION_COUNT ) && ( (pstPointer+i)->ulControlDepedenceNodeAddress > 0 ) ){
+        if( (pstPointer+i)->ulControlDepedenceNodeAddress == ulEIP ){
+            TCGv cur_loc_v1 = tcg_const_tl(ulEIP);
+            TCGv cur_loc_v2 = tcg_const_tl((pstPointer+i)->ulControlDepedenceNodeDistance);
+            gen_helper_afl_distance_log(cur_loc_v1, cur_loc_v2);
+            tcg_temp_free(cur_loc_v1);
+            tcg_temp_free(cur_loc_v2);
+        }
+        i++;
+    }
+    
+    /*
+    fp = fopen("/home/yang/MyProject/log.txt", "w");
+    if( NULL != fp ){
+        memset(buffer,0,128);
+        sprintf(buffer, "[afl_gen_trace] current eip:0x%lx\n",ulEIP);
+        fwrite(buffer, sizeof(char), strlen(buffer), fp);
+        memset(buffer,0,128);
+        sprintf(buffer, "[afl_gen_trace] Get afl_distance_area_ptr:0x%lx\n",(uint64_t)afl_distance_area_ptr);
+        fwrite(buffer, sizeof(char), strlen(buffer), fp);
+        
+        for( int i = 0 ; i < HASH_TABLE_SIZE ; i++ ){
+            if( 0 != ((P_CONTROL_DEPENDENCE_NDOE_RECORD)afl_distance_area_ptr + i)->ulControlDepedenceNodeDistance){
+                memset(buffer, 0, 128);
+                sprintf(buffer, "[afl_gen_trace] index:%d\n", i);
+                fwrite(buffer, sizeof(char), strlen(buffer), fp);
 
-  //fprintf(stderr,"Address is:0x%lx\n",ulIndex);
-  i = 0;
-  while( ( i < HASH_TABLE_MAX_COLLISION_COUNT ) && ( (pstPointer+i)->ulControlDepedenceNodeAddress > 0 ) ){
-      if( cur_loc == (pstPointer+i)->ulControlDepedenceNodeAddress ){
-          TCGv cur_loc_v1 = tcg_const_tl(cur_loc);
-          TCGv cur_loc_v2 = tcg_const_tl((pstPointer+i)->ulControlDepedenceNodeDistance);
-          gen_helper_afl_distance_log(cur_loc_v1, cur_loc_v2);
-          tcg_temp_free(cur_loc_v1);
-          tcg_temp_free(cur_loc_v2);
-
-       	fp = fopen("/home/yang/log.txt", "a+");
-        if( NULL != fp ){
-            fwrite(buffer, sizeof(char), 128, fp);
-            fclose(fp);
-        }else{
-            fprintf(stderr,"load File Error\n");
-            exit(-1);
+                memset(buffer, 0, 128);
+                sprintf(buffer, "[afl_gen_trace] DATA:0x%lx\n", ((P_CONTROL_DEPENDENCE_NDOE_RECORD)afl_distance_area_ptr + i)->ulControlDepedenceNodeAddress);
+                fwrite(buffer, sizeof(char), strlen(buffer), fp);
+            
+                memset(buffer, 0, 128);
+                sprintf(buffer, "[afl_gen_trace] DISTANCE:%ld\n", ((P_CONTROL_DEPENDENCE_NDOE_RECORD)afl_distance_area_ptr + i)->ulControlDepedenceNodeDistance);
+                fwrite(buffer, sizeof(char), strlen(buffer), fp);
+            }
         }
 
+        fclose(fp);
+    }else{
+        fprintf(stderr,"load File Error\n");
+        //exit(-1);
+    }
+    */
+  }
+  /*
+  i = 0;
+  while( ( i < HASH_TABLE_MAX_COLLISION_COUNT ) && ( (pstPointer+i)->ulControlDepedenceNodeAddress > 0 ) ){
+      if( ulEIP == (pstPointer+i)->ulControlDepedenceNodeAddress ){
+          
+          
+          fp = fopen("/home/yang/MyProject/log.txt", "a+");
+          if( NULL != fp ){
+            fwrite(buffer, sizeof(char), strlen(buffer), fp);
+            fclose(fp);
+          }else{
+            fprintf(stderr,"load File Error\n");
+            //exit(-1);
+          }
           break;
       }
       i++;
   }
-
-  
+  */
 
 // FirefoxXP Add End
 ////////////////////////////////////////////////////////////////////////////////

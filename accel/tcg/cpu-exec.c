@@ -72,11 +72,11 @@ unsigned char *afl_area_ptr = dummy;          /* Exported for afl_gen_trace */
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // FirefoxXP Add Start
 
-unsigned char *afl_distance_area_ptr          = dummy;          /* Exported for afl_gen_trace */
-unsigned char *afl_cdn_shortest_distance_ptr  = dummy;          /* Exported for afl_gen_trace */
-unsigned char *afl_cdn_count_ptr              = dummy;          /* Exported for afl_gen_trace */
-unsigned char *afl_cdn_distance_ptr           = dummy;          /* Exported for afl_gen_trace */
-unsigned char *afl_cdn_address_ptr            = dummy;          /* Exported for afl_gen_trace */
+unsigned char *afl_distance_area_ptr          = NULL;          /* Exported for afl_gen_trace */
+unsigned char *afl_cdn_shortest_distance_ptr  = NULL;          /* Exported for afl_gen_trace */
+unsigned char *afl_cdn_count_ptr              = NULL;          /* Exported for afl_gen_trace */
+unsigned char *afl_cdn_distance_ptr           = NULL;          /* Exported for afl_gen_trace */
+unsigned char *afl_cdn_address_ptr            = NULL;          /* Exported for afl_gen_trace */
 
 // FirefoxXP Add End
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -321,6 +321,13 @@ static void afl_map_shm_fuzz(void) {
   }
 
 }
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+// FirefoxXP Add Start
+
+#define DISTANCE_SHM_ENV_VAR "__DISTANCE_AFL_SHM_ID"
+
+// FirefoxXP Add End
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void afl_setup(void) {
 
@@ -358,20 +365,59 @@ void afl_setup(void) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // FirefoxXP Add Start
 
+  char *distance_id_str;
+
   /* load distance memory */ 
   if (getenv(DISTANCE_SHM_ENV_VAR)) {  // 
 
-    id_str = getenv(DISTANCE_SHM_ENV_VAR);
+    distance_id_str = getenv(DISTANCE_SHM_ENV_VAR);
 
-    if (id_str) {
+    if (distance_id_str) {
 
-      u32 shm_id = atoi(id_str);
+      u32 shm_distance_id = atoi(distance_id_str);
 
-      afl_distance_area_ptr = shmat(shm_id, NULL, 0);
+      afl_distance_area_ptr = shmat(shm_distance_id, NULL, 0);
 
       if (afl_distance_area_ptr == (void *)-1) exit(1);
 
     }
+    /*
+    char buffer[128];
+    
+    FILE* fp = fopen("/home/yang/MyProject/address.txt", "w");
+    if( NULL != fp ){
+      memset(buffer, 0, 128);
+      sprintf(buffer,"[afl_setup] Address:0x%lx\n",(uint64_t)afl_distance_area_ptr);
+      fwrite(buffer, sizeof(char), strlen(buffer), fp);
+      memset(buffer, 0, 128);
+      sprintf(buffer,"[afl_setup] distance_id_str:%s\n",distance_id_str);
+      fwrite(buffer, sizeof(char), strlen(buffer), fp);
+      
+      for( int i = 0 ; i < HASH_TABLE_SIZE ; i++ ){
+        if( 0 != ((P_CONTROL_DEPENDENCE_NDOE_RECORD)afl_distance_area_ptr + i)->ulControlDepedenceNodeDistance){
+          memset(buffer, 0, 128);
+          sprintf(buffer, "[afl_setup] index:%d\n", i);
+          
+          fwrite(buffer, sizeof(char), strlen(buffer), fp);
+
+          memset(buffer, 0, 128);
+          sprintf(buffer, "[afl_setup] DATA:0x%lx\n", ((P_CONTROL_DEPENDENCE_NDOE_RECORD)afl_distance_area_ptr + i)->ulControlDepedenceNodeAddress);
+          fwrite(buffer, sizeof(char), strlen(buffer), fp);
+          
+          memset(buffer, 0, 128);
+          sprintf(buffer, "[afl_setup] DISTANCE:%ld\n", ((P_CONTROL_DEPENDENCE_NDOE_RECORD)afl_distance_area_ptr + i)->ulControlDepedenceNodeDistance);
+          fwrite(buffer, sizeof(char), strlen(buffer), fp);
+          
+        }
+      }
+      
+      fclose(fp);
+      
+    }else{
+      fprintf(stderr,"load File Error\n");
+      //exit(-1);
+    }
+    */
 
     afl_cdn_shortest_distance_ptr   = afl_area_ptr + sizeof(int64_t);
     afl_cdn_count_ptr               = afl_cdn_shortest_distance_ptr + sizeof(int64_t);
