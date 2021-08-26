@@ -419,7 +419,7 @@ void afl_setup(void) {
     }
     */
 
-    afl_cdn_shortest_distance_ptr   = afl_area_ptr + sizeof(int64_t);
+    afl_cdn_shortest_distance_ptr   = afl_area_ptr + MAP_SIZE;
     afl_cdn_count_ptr               = afl_cdn_shortest_distance_ptr + sizeof(int64_t);
     afl_cdn_distance_ptr            = afl_cdn_count_ptr + sizeof(int64_t);
     afl_cdn_address_ptr             = afl_cdn_distance_ptr + sizeof(int64_t);
