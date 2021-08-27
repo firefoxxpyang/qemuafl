@@ -85,21 +85,65 @@ void HELPER(afl_maybe_log)(target_ulong cur_loc) {
 //////////////////////////////////////////////////////////////////////////////////////////////
 // FirefoxXP Add Start
 
-extern unsigned char *afl_distance_area_ptr;
-extern unsigned char *afl_cdn_shortest_distance_ptr;
-extern unsigned char *afl_cdn_count_ptr;
-extern unsigned char *afl_cdn_distance_ptr;
-extern unsigned char *afl_cdn_address_ptr;
+extern uint64_t *afl_distance_area_ptr;
+extern uint64_t *afl_cdn_shortest_distance_ptr;
+extern uint64_t *afl_cdn_count_ptr;
+extern uint64_t *afl_cdn_distance_ptr;
+extern uint64_t *afl_cdn_address_ptr;
 
 void HELPER(afl_distance_log)(target_ulong cur_loc,target_ulong distance) {
-    /*
     FILE*         fp;
     char          buffer[128];
+
+    if( 0 == *afl_cdn_shortest_distance_ptr){
+        *afl_cdn_address_ptr            = cur_loc;
+        *afl_cdn_shortest_distance_ptr  = distance;
+
+    }else if( *afl_cdn_shortest_distance_ptr >= distance ){
+        *afl_cdn_address_ptr            = cur_loc;
+        *afl_cdn_shortest_distance_ptr  = distance;
+        fp = fopen("/home/yang/MyProject/qemuafl_distance.txt", "a+");
+        if( NULL != fp ){
+            memset(buffer,0,128);
+            sprintf(buffer, "[afl_distance_log] shortest distance:%ld\n",distance);
+            fwrite(buffer, sizeof(char), strlen(buffer), fp);
+
+            memset(buffer,0,128);
+            sprintf(buffer, "[afl_distance_log] nearest CDN:0x%lx\n",cur_loc);
+            fwrite(buffer, sizeof(char), strlen(buffer), fp);
+
+            fclose(fp);
+        }else{
+            fprintf(stderr,"load File Error\n");
+            //exit(-1);
+        }
+    }
+    *afl_cdn_count_ptr = *afl_cdn_count_ptr  + 1;
+    *afl_cdn_distance_ptr = *afl_cdn_distance_ptr + distance;
+
     
-    fp = fopen("/home/yang/MyProject/target.txt", "a+");
+    
+    
+    fp = fopen("/home/yang/MyProject/qemuafl_distance.txt", "a+");
     if( NULL != fp ){
         memset(buffer,0,128);
         sprintf(buffer, "[afl_distance_log] current CDN eip:0x%lx\n",cur_loc);
+        fwrite(buffer, sizeof(char), strlen(buffer), fp);
+
+        memset(buffer,0,128);
+        sprintf(buffer, "[afl_distance_log] current CDN count:%lu\n",*afl_cdn_count_ptr);
+        fwrite(buffer, sizeof(char), strlen(buffer), fp);
+
+        memset(buffer,0,128);
+        sprintf(buffer, "[afl_distance_log] current CDN distance:%lu\n",distance);
+        fwrite(buffer, sizeof(char), strlen(buffer), fp);
+
+        memset(buffer,0,128);
+        sprintf(buffer, "[afl_distance_log] current CDN total distance:%lu\n",*afl_cdn_distance_ptr);
+        fwrite(buffer, sizeof(char), strlen(buffer), fp);
+
+        memset(buffer,0,128);
+        sprintf(buffer, "[afl_distance_log] current CDN shortest distance:%lu\n",*afl_cdn_shortest_distance_ptr);
         fwrite(buffer, sizeof(char), strlen(buffer), fp);
 
         fclose(fp);
@@ -107,14 +151,7 @@ void HELPER(afl_distance_log)(target_ulong cur_loc,target_ulong distance) {
         fprintf(stderr,"load File Error\n");
         //exit(-1);
     }
-    */
-    if(*afl_cdn_shortest_distance_ptr >= distance ){
-        *afl_cdn_address_ptr            = cur_loc;
-        *afl_cdn_shortest_distance_ptr  = distance;
-    }
-    *afl_cdn_count_ptr = *afl_cdn_count_ptr  + 1;
-    *afl_cdn_distance_ptr = *afl_cdn_distance_ptr + distance;
-
+    
 }
 
 // FirefoxXP Add End
