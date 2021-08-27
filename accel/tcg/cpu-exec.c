@@ -424,6 +424,40 @@ void afl_setup(void) {
     afl_cdn_distance_ptr            = afl_cdn_count_ptr + sizeof(int64_t);
     afl_cdn_address_ptr             = afl_cdn_distance_ptr + sizeof(int64_t);
 
+    char buffer[128];
+    FILE* fp = fopen("/home/yang/MyProject/qemuafl_shm_address.txt", "w");
+    if( NULL != fp ){
+      memset(buffer, 0, 128);
+      sprintf(buffer,"[afl_setup] afl_area_ptr Address:0x%lx\n",(uint64_t)afl_area_ptr);
+      fwrite(buffer, sizeof(char), strlen(buffer), fp);
+
+      memset(buffer, 0, 128);
+      sprintf(buffer,"[afl_setup] MAP_SIZE:0x%lx\n",(uint64_t)MAP_SIZE);
+      fwrite(buffer, sizeof(char), strlen(buffer), fp);
+
+      memset(buffer, 0, 128);
+      sprintf(buffer,"[afl_setup] afl_cdn_shortest_distance_ptr Address:0x%lx\n",(uint64_t)afl_cdn_shortest_distance_ptr);
+      fwrite(buffer, sizeof(char), strlen(buffer), fp);
+
+      memset(buffer, 0, 128);
+      sprintf(buffer,"[afl_setup] afl_cdn_count_ptr Address:0x%lx\n",(uint64_t)afl_cdn_count_ptr);
+      fwrite(buffer, sizeof(char), strlen(buffer), fp);
+
+      memset(buffer, 0, 128);
+      sprintf(buffer,"[afl_setup] afl_cdn_address_ptr Address:0x%lx\n",(uint64_t)afl_cdn_address_ptr);
+      fwrite(buffer, sizeof(char), strlen(buffer), fp);
+
+      memset(buffer, 0, 128);
+      sprintf(buffer,"[afl_setup] distance_id_str:%s\n",afl_distance_area_ptr);
+      fwrite(buffer, sizeof(char), strlen(buffer), fp);
+
+      memset(buffer, 0, 128);
+      sprintf(buffer,"[afl_setup] distance_id_str:%s\n",distance_id_str);
+      fwrite(buffer, sizeof(char), strlen(buffer), fp);
+      
+      
+      fclose(fp);
+    }
   }
 
 // FirefoxXP Add End
