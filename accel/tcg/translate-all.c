@@ -102,6 +102,7 @@ void HELPER(afl_distance_log)(target_ulong cur_loc,target_ulong distance) {
     }else if( *afl_cdn_shortest_distance_ptr >= distance ){
         *afl_cdn_address_ptr            = cur_loc;
         *afl_cdn_shortest_distance_ptr  = distance;
+        /*
         fp = fopen("/home/yang/MyProject/qemuafl_distance.txt", "a+");
         if( NULL != fp ){
             memset(buffer,0,128);
@@ -117,13 +118,12 @@ void HELPER(afl_distance_log)(target_ulong cur_loc,target_ulong distance) {
             fprintf(stderr,"load File Error\n");
             //exit(-1);
         }
+        */
     }
     *afl_cdn_count_ptr = *afl_cdn_count_ptr  + 1;
     *afl_cdn_distance_ptr = *afl_cdn_distance_ptr + distance;
-
     
-    
-    
+    /*
     fp = fopen("/home/yang/MyProject/qemuafl_distance.txt", "a+");
     if( NULL != fp ){
         memset(buffer,0,128);
@@ -151,7 +151,7 @@ void HELPER(afl_distance_log)(target_ulong cur_loc,target_ulong distance) {
         fprintf(stderr,"load File Error\n");
         //exit(-1);
     }
-    
+    */
 }
 
 // FirefoxXP Add End

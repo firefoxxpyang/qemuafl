@@ -425,7 +425,7 @@ void afl_setup(void) {
     afl_cdn_address_ptr             = (uint64_t*)(afl_area_ptr + MAP_SIZE + 3*sizeof(int64_t));
 
     //*afl_cdn_shortest_distance_ptr   = 0xFFFFFFFFFFFF;
-
+    /*
     char buffer[128];
     FILE* fp = fopen("/home/yang/MyProject/qemuafl_shm_address.txt", "w");
     if( NULL != fp ){
@@ -464,6 +464,7 @@ void afl_setup(void) {
       
       fclose(fp);
     }
+    */
   }
 
 // FirefoxXP Add End
