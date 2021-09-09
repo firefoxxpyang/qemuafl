@@ -74,6 +74,7 @@ unsigned char *afl_area_ptr = dummy;          /* Exported for afl_gen_trace */
 
 uint64_t *afl_distance_area_ptr          = NULL;          /* Exported for afl_gen_trace */
 uint64_t *afl_cdn_shortest_distance_ptr  = NULL;          /* Exported for afl_gen_trace */
+uint64_t *afl_cdn_longest_distance_ptr   = NULL;          /* Exported for afl_gen_trace */
 uint64_t *afl_cdn_count_ptr              = NULL;          /* Exported for afl_gen_trace */
 uint64_t *afl_cdn_distance_ptr           = NULL;          /* Exported for afl_gen_trace */
 uint64_t *afl_cdn_address_ptr            = NULL;          /* Exported for afl_gen_trace */
@@ -420,9 +421,10 @@ void afl_setup(void) {
     */
 
     afl_cdn_shortest_distance_ptr   = (uint64_t*)(afl_area_ptr + MAP_SIZE);
-    afl_cdn_count_ptr               = (uint64_t*)(afl_area_ptr + MAP_SIZE + sizeof(int64_t));
+    afl_cdn_longest_distance_ptr    = (uint64_t*)(afl_area_ptr + MAP_SIZE + sizeof(int64_t));
     afl_cdn_distance_ptr            = (uint64_t*)(afl_area_ptr + MAP_SIZE + 2*sizeof(int64_t));
-    afl_cdn_address_ptr             = (uint64_t*)(afl_area_ptr + MAP_SIZE + 3*sizeof(int64_t));
+    afl_cdn_count_ptr               = (uint64_t*)(afl_area_ptr + MAP_SIZE + 3*sizeof(int64_t));
+    afl_cdn_address_ptr             = (uint64_t*)(afl_area_ptr + MAP_SIZE + 4*sizeof(int64_t));
 
     //*afl_cdn_shortest_distance_ptr   = 0xFFFFFFFFFFFF;
     /*

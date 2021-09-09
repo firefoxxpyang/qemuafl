@@ -87,8 +87,9 @@ void HELPER(afl_maybe_log)(target_ulong cur_loc) {
 
 extern uint64_t *afl_distance_area_ptr;
 extern uint64_t *afl_cdn_shortest_distance_ptr;
-extern uint64_t *afl_cdn_count_ptr;
+extern uint64_t *afl_cdn_longest_distance_ptr;
 extern uint64_t *afl_cdn_distance_ptr;
+extern uint64_t *afl_cdn_count_ptr;
 extern uint64_t *afl_cdn_address_ptr;
 
 void HELPER(afl_distance_log)(target_ulong cur_loc,target_ulong distance) {
@@ -120,8 +121,13 @@ void HELPER(afl_distance_log)(target_ulong cur_loc,target_ulong distance) {
         }
         */
     }
-    *afl_cdn_count_ptr = *afl_cdn_count_ptr  + 1;
-    *afl_cdn_distance_ptr = *afl_cdn_distance_ptr + distance;
+
+    if( *afl_cdn_longest_distance_ptr < distance ){
+        *afl_cdn_longest_distance_ptr = distance;
+    }
+
+    *afl_cdn_count_ptr      = *afl_cdn_count_ptr  + 1;
+    *afl_cdn_distance_ptr   = *afl_cdn_distance_ptr + distance;
     
     /*
     fp = fopen("/home/yang/MyProject/qemuafl_distance.txt", "a+");
