@@ -75,8 +75,8 @@ unsigned char *afl_area_ptr = dummy;          /* Exported for afl_gen_trace */
 uint64_t *afl_distance_area_ptr          = NULL;          /* Exported for afl_gen_trace */
 uint64_t *afl_cdn_shortest_distance_ptr  = NULL;          /* Exported for afl_gen_trace */
 uint64_t *afl_cdn_longest_distance_ptr   = NULL;          /* Exported for afl_gen_trace */
-uint64_t *afl_cdn_count_ptr              = NULL;          /* Exported for afl_gen_trace */
 uint64_t *afl_cdn_distance_ptr           = NULL;          /* Exported for afl_gen_trace */
+uint64_t *afl_cdn_count_ptr              = NULL;          /* Exported for afl_gen_trace */
 uint64_t *afl_cdn_address_ptr            = NULL;          /* Exported for afl_gen_trace */
 
 // FirefoxXP Add End
