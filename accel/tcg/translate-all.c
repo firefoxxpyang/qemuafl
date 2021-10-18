@@ -86,23 +86,26 @@ void HELPER(afl_maybe_log)(target_ulong cur_loc) {
 // FirefoxXP Add Start
 
 extern uint64_t *afl_distance_area_ptr;
+extern uint64_t *afl_cdn_nearest_jcc_ptr;
 extern uint64_t *afl_cdn_shortest_distance_ptr;
 extern uint64_t *afl_cdn_longest_distance_ptr;
-extern uint64_t *afl_cdn_distance_ptr;
-extern uint64_t *afl_cdn_count_ptr;
-extern uint64_t *afl_cdn_address_ptr;
+extern uint64_t *afl_cdn_total_distance_ptr;
+extern uint64_t *afl_cdn_total_count_ptr;
+extern uint64_t *afl_cdn_nearest_address_ptr;
 
-void HELPER(afl_distance_log)(target_ulong cur_loc,target_ulong distance) {
+void HELPER(afl_distance_log)(target_ulong cur_loc,target_ulong distance, target_ulong jcc_address) {
     FILE*         fp;
     char          buffer[128];
 
     if( 0 == *afl_cdn_shortest_distance_ptr){
-        *afl_cdn_address_ptr            = cur_loc;
+        *afl_cdn_nearest_address_ptr    = cur_loc;
         *afl_cdn_shortest_distance_ptr  = distance;
+        *afl_cdn_nearest_jcc_ptr        = jcc_address;
 
     }else if( *afl_cdn_shortest_distance_ptr >= distance ){
-        *afl_cdn_address_ptr            = cur_loc;
+        *afl_cdn_nearest_address_ptr    = cur_loc;
         *afl_cdn_shortest_distance_ptr  = distance;
+        *afl_cdn_nearest_jcc_ptr        = jcc_address;
         /*
         fp = fopen("/home/yang/MyProject/qemuafl_distance.txt", "a+");
         if( NULL != fp ){
@@ -126,8 +129,8 @@ void HELPER(afl_distance_log)(target_ulong cur_loc,target_ulong distance) {
         *afl_cdn_longest_distance_ptr = distance;
     }
 
-    *afl_cdn_count_ptr      = *afl_cdn_count_ptr  + 1;
-    *afl_cdn_distance_ptr   = *afl_cdn_distance_ptr + distance;
+    *afl_cdn_total_count_ptr      = *afl_cdn_total_count_ptr  + 1;
+    *afl_cdn_total_distance_ptr   = *afl_cdn_total_distance_ptr + distance;
     
     /*
     fp = fopen("/home/yang/MyProject/qemuafl_distance.txt", "a+");
@@ -227,9 +230,11 @@ static void afl_gen_trace(target_ulong cur_loc) {
         if( (pstPointer+i)->ulControlDepedenceNodeAddress == ulEIP ){
             TCGv cur_loc_v1 = tcg_const_tl(ulEIP);
             TCGv cur_loc_v2 = tcg_const_tl((pstPointer+i)->ulControlDepedenceNodeDistance);
-            gen_helper_afl_distance_log(cur_loc_v1, cur_loc_v2);
+            TCGv cur_loc_v3 = tcg_const_tl((pstPointer+i)->ulControlDepedenceNodeJccAddress);
+            gen_helper_afl_distance_log(cur_loc_v1, cur_loc_v2, cur_loc_v3);
             tcg_temp_free(cur_loc_v1);
             tcg_temp_free(cur_loc_v2);
+            tcg_temp_free(cur_loc_v3);
         }
         i++;
     }

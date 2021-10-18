@@ -188,13 +188,14 @@ static inline int afl_must_instrument(target_ulong addr) {
 //////////////////////////////////////////////////////////////////////////////////////////////
 // FirefoxXP Add Start
 
-#define HASH_TABLE_SIZE					65536
+#define HASH_TABLE_SIZE                 65536
 #define HASH_TABLE_MAX_COLLISION_COUNT	4
-#define ADDRESS_MASK					0xFFFFF
+#define ADDRESS_MASK                    0xFFFFF
 
 typedef struct _CONTROL_DEPENDENCE_NDOE_RECORD_{
-	uint64_t	ulControlDepedenceNodeAddress;
-	uint64_t    ulControlDepedenceNodeDistance;
+  uint64_t    ulControlDepedenceNodeAddress;
+  uint64_t    ulControlDepedenceNodeDistance;
+  uint64_t    ulControlDepedenceNodeJccAddress;
 }CONTROL_DEPENDENCE_NDOE_RECORD,*P_CONTROL_DEPENDENCE_NDOE_RECORD,**PP_CONTROL_DEPENDENCE_NDOE_RECORD;
 
 // FirefoxXP Add End
