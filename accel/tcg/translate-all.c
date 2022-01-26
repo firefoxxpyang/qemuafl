@@ -84,6 +84,7 @@ void HELPER(afl_maybe_log)(target_ulong cur_loc) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // FirefoxXP Add Start
+#define ADDRESS_MASK					0xFFFFFFFF
 
 extern uint64_t *afl_distance_area_ptr;
 extern uint64_t *afl_cdn_nearest_jcc_ptr;
@@ -220,8 +221,8 @@ static void afl_gen_trace(target_ulong cur_loc) {
   if(NULL != afl_distance_area_ptr){
     //FILE*         fp;
     //char          buffer[128];
-    ulIndex     = (ulEIP & 0xFFFFF) % ( HASH_TABLE_SIZE/4 );
-    pstPointer  = (P_CONTROL_DEPENDENCE_NDOE_RECORD)afl_distance_area_ptr + ulIndex;
+    ulIndex     = (ulEIP & ADDRESS_MASK ) % ( HASH_TABLE_SIZE/HASH_TABLE_MAX_COLLISION_COUNT );
+    pstPointer  = (P_CONTROL_DEPENDENCE_NDOE_RECORD)afl_distance_area_ptr + ulIndex*HASH_TABLE_MAX_COLLISION_COUNT;
     
     //fprintf(stderr,"Address is:0x%lx\n",ulIndex);
     
